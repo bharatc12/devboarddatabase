@@ -2,8 +2,8 @@
 <?php
 
 $servername = "localhost";
-$username = "your_username";
-$password = "your_password";
+$username = "postgres";
+$password = "password";
 $dbname = "your_database_name";
 
 try {
@@ -24,7 +24,7 @@ if (!$conn) {
 $sql = "SELECT * FROM BOARDS";
 
 try {
-  // Prepare statement with error checking
+  
   $stmt = $conn->prepare($sql);
   $stmt->execute();
 } catch(PDOException $e) {
@@ -66,7 +66,7 @@ if (!$boards) {
   echo "</table>";
 }
 
-// Close connection (optional, but good practice)
+
 $conn = null;
 
 ?>
