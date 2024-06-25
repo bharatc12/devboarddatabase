@@ -45,7 +45,6 @@
 
 // For the CUDA runtime routines (prefixed with "cuda_")
 #include <cuda_runtime.h>
-
 #include <helper_cuda.h>
 /**
  * CUDA Kernel Device code
@@ -71,24 +70,34 @@ __global__ void vectorAdd(const float *A, const float *B, float *C,
  * Host main routine
  */
 
+//variable to track memory useage of the program
 size_t allocated_memory = 0;
 
+
+
+
+//method to track memory usage 
 void *my_malloc(size_t size) {
   void *ptr = malloc(size);
+  //if the requested allocation is successful
+  //increase by size of memory requested for allocation
   if (ptr) {
     allocated_memory += size;
   }
   return ptr;
 }
 
+//custom method for memory deallocation
+//subtracts from memory amount used if an deallocation is successful
 void my_free(void *ptr) {
   if (ptr) {
-    allocated_memory -= malloc_usable_size(ptr); // Consider using malloc_usable_size for more accurate deallocation tracking
+    allocated_memory -= malloc_usable_size(ptr); 
   }
   free(ptr);
 }
 
 
+//returns a structure the websocket can aceess fields from
 struct executiontime benchmark() {
   struct executiontime result;
   // Error code to check return values for CUDA calls
@@ -102,13 +111,13 @@ struct executiontime benchmark() {
     clock_t start_time = clock();
      
   // Allocate the host input vector A
-  float *h_A = (float *)malloc(size);
+  float *h_A = (float *)*my_malloc(size);
 
   // Allocate the host input vector B
-  float *h_B = (float *)malloc(size);
+  float *h_B = (float *)*my_malloc(size);
 
   // Allocate the host output vector C
-  float *h_C = (float *)malloc(size);
+  float *h_C = (float *)*my_malloc(size);
 
   // Verify that allocations succeeded
   if (h_A == NULL || h_B == NULL || h_C == NULL) {
@@ -256,20 +265,25 @@ struct executiontime benchmark() {
 
 int main(){
 
+//data structure to store resouce useage information
 struct rusage usage;
+
+
 
   getrusage(RUSAGE_SELF, &usage);
 
+  //records cpu time before the method is run
   double user_cpu_time = (double)usage.ru_utime.tv_sec + (double)usage.ru_utime.tv_usec / 1000000;
   double system_cpu_time = (double)usage.ru_stime.tv_sec + (double)usage.ru_stime.tv_usec / 1000000;
 
   printf("User CPU time: %f seconds\n", user_cpu_time);
   printf("System CPU time: %f seconds\n", system_cpu_time);
 
-  // Your program code here
+  benchmark();
 
   getrusage(RUSAGE_SELF, &usage);
 
+  //records cpu time after method is running
   user_cpu_time = (double)usage.ru_utime.tv_sec + (double)usage.ru_utime.tv_usec / 1000000;
   system_cpu_time = (double)usage.ru_stime.tv_sec + (double)usage.ru_stime.tv_usec / 1000000;
 
