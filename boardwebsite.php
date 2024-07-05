@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Page Title</title>
+<title>Board Website</title>
 </head>
 <body>
 
-<h1>This is a Heading</h1>
+<h1>These Are the Boards from the Database</h1>
 <?php 
-   $conn = pg_pconnect("host=sheep port=5432 dbname=mary user=lamb password=foo");
+   $conn = pg_pconnect("host=inserthostname port=5432 dbname=insertdbname user=insertuser password="insertpassword");
    if (!$conn) {
      echo "An error occurred.\n";
      exit;
