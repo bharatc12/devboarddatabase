@@ -1,36 +1,34 @@
-CREATE TABLE BOARDS (
-	BoardName varchar(255) NOT NULL,
-	ProcessorSlots BOOLEAN[]
-	ProcessorName varchar(255) NOT NULL,
-	RAMVersion varchar(255) NOT NULL,
-	StorageType varchar(255) NOT NULL,
-	OperatingSystem varchar(255) NOT NULL,
-	IOInterface varchar(255) NOT NULL,
-	GraphicsProccessorName varchar(255),
-	SystemOnChip varchar(255),
-	WirelessVersion varchar(255),
-	BoardType ENUM ('FPGA', 'ASIC','SBC'),
-	SensorList varchar(255)[],
-	FOREIGN KEY (ProcessorName) REFERENCES PROCESSORS(ProcessorName),
-	FOREIGN KEY (RAMVersion) REFERENCES RAMINFORMATION(VersionName),
-	FOREIGN KEY (OperatingSystem) REFERENCES OPERATINGSYSTEM(DeviceName),
-	FOREIGN KEY (GraphicsProccessorName) REFERENCES GPUINFORMATION(ProductCode),
-	FOREIGN KEY (WirelessVersion) REFERENCES WIRELESSINFORMATION(ChipID),
-	PRIMARY KEY (BoardName)
-);
 
 CREATE TABLE PROCESSORS (
 	ProcessorName varchar(255) NOT NULL,
-	SecondaryProccessor varchar(255),
-	ThirdProccessor varchar(255),
 	Architecture varchar(50), 
 	Clockspeed int,
 	Cores int,
 	RegisterLength int,
+	TransisitorWidth int,
 	ProcessorType int,
 	AveragePower int,
 	PRIMARY KEY (ProcessorName)
 	
+);
+
+CREATE TABLE PROCESSORNAMES (
+	BoardName varchar(255) NOT NULL,
+	ProcessorName varchar(255) NOT NULL,
+	SecondaryProcessor varchar(255),
+	ThirdProcessor varchar(255),
+	FOREIGN KEY (ProcessorName) REFERENCES PROCESSORS(ProcessorName),
+	FOREIGN KEY (SecondaryProcessor) REFERENCES PROCESSORS(ProcessorName),
+	FOREIGN KEY (ThirdProcessor) REFERENCES PROCESSORS(ProcessorName),
+	PRIMARY KEY (BoardName)
+);
+
+
+
+CREATE TABLE NEURALPROCESSORS (
+	ChipID int,
+	Speed int,
+	RegisterSupport int[]
 );
 
 CREATE TABLE RAMINFORMATION (
@@ -44,20 +42,12 @@ CREATE TABLE RAMINFORMATION (
 );
 
 CREATE TABLE GPUINFORMATION(
-	ProductCode int,
+	GPUName varchar(255),
 	VideoMemory int,
 	Clockspeed int,
+	TransisitorWidth int,
+	PRIMARY KEY(GPUName)
 );
-
-CREATE TABLE IO-INTERFACE (
-	DeviceName varchar(255) NOT NULL,
-	ethernetversion varchar(255) NOT NULL,
-	USBInformation varchar(255) NOT NULL,
-	FOREIGN KEY (EthernetVersion) REFERENCES ETHERNETINFORMATION(EthernetVersion),
-	FOREIGN KEY (USBInformation) REFERENCES USBINFORMATION(AssociatedDevice),
-	PRIMARY KEY (DeviceName)
-);
-
 CREATE TABLE ETHERNETINFORMATION (
 	EthernetVersion varchar(255) NOT NULL,
 	Speed int,
@@ -68,18 +58,28 @@ CREATE TABLE ETHERNETINFORMATION (
 
 CREATE TABLE USBINFORMATION(
 	AssociatedDevice varchar(255) NOT NULL,
-	USB-A boolean,
-	USB-ACount int,
-	USB-C boolean,
-	USB-CCount int,
-	USB-MicroB boolean,
-	USB-MicroBCount int,
+	USBA boolean,
+	USBACount int,
+	USBC boolean,
+	USBCCount int,
+	USBMicroB boolean,
+	USBMicroBCount int,
 	PRIMARY KEY (AssociatedDevice)
 );
 
+CREATE TABLE IOINTERFACE (
+	BoardName varchar(255) NOT NULL,
+	ethernetversion varchar(255) NOT NULL,
+	USBInformation varchar(255) NOT NULL,
+	FOREIGN KEY (EthernetVersion) REFERENCES ETHERNETINFORMATION(EthernetVersion),
+	FOREIGN KEY (USBInformation) REFERENCES USBINFORMATION(AssociatedDevice),
+	PRIMARY KEY (BoardName)
+);
+
+
 CREATE TABLE OPERATINGSYSTEM (
 	DeviceName varchar(255) NOT NULL,
-	OSType  ENUM ('Windows', 'Linux','MacOS','Android')DEFAULT 'Linux',
+	OSType  os,
 	Version int,
 	PRIMARY KEY (DeviceName)
 	
@@ -99,3 +99,24 @@ CREATE TABLE WIRELESSINFORMATION (
 	PRIMARY KEY (ChipID)
 );
 
+CREATE TABLE BOARDS (
+	BoardName varchar(255) NOT NULL,
+	RAMVersion varchar(255) NOT NULL,
+	StorageType varchar(255) NOT NULL,
+	OperatingSystem varchar(255) NOT NULL,
+	IOInterface varchar(255) NOT NULL,
+	NeuralProcessorID int,
+	GraphicsProccessorName varchar(255),
+	SystemOnChip varchar(255),
+	WirelessVersion varchar(255),
+	BoardType type,
+	SensorList varchar(255)[],
+	FOREIGN KEY (BoardName) REFERENCES PROCESSORNAMES(BoardName),
+	FOREIGN KEY (BoardName) REFERENCES IOINTERFACE(BoardName),
+	FOREIGN KEY (RAMVersion) REFERENCES RAMINFORMATION(VersionName),
+	FOREIGN KEY (StorageType) REFERENCES STORAGEINFORMATION(ModelName),
+	FOREIGN KEY (OperatingSystem) REFERENCES OPERATINGSYSTEM(DeviceName),
+	FOREIGN KEY (GraphicsProccessorName) REFERENCES GPUINFORMATION(GPUName),
+	FOREIGN KEY (WirelessVersion) REFERENCES WIRELESSINFORMATION(ChipID),
+	PRIMARY KEY (BoardName)
+);
